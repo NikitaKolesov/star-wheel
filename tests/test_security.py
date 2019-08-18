@@ -11,8 +11,14 @@ from starlette.status import HTTP_401_UNAUTHORIZED
 from star_wheel.db import session_scope
 from star_wheel.db.sa_models import User, Base, TelegramTimestamp
 from star_wheel.schemas import UserSchema
-from star_wheel.security import get_password_hash, check_telegram_login_timestamp, get_current_user, \
-    create_access_token, get_current_active_user, authenticate_user
+from star_wheel.security import (
+    get_password_hash,
+    check_telegram_login_timestamp,
+    get_current_user,
+    create_access_token,
+    get_current_active_user,
+    authenticate_user,
+)
 
 AUTH_DATE = 1565899537
 fake_users_dicts = [
@@ -38,9 +44,7 @@ def recreate_fake_db():
 @pytest.fixture()
 def user_in_db() -> UserSchema:
     with session_scope() as session:
-        user = User(login=generic.person.username(), password_hash=get_password_hash(DEFAULT_PASSWORD)).create(
-            session
-        )
+        user = User(login=generic.person.username(), password_hash=get_password_hash(DEFAULT_PASSWORD)).create(session)
         return UserSchema(**user.__dict__)
 
 
@@ -54,6 +58,14 @@ def timestamp_in_db() -> float:
 def token(user_in_db):
     access_token_expires = timedelta(minutes=5)
     return create_access_token(data={"sub": user_in_db.login, "scopes": list()}, expires_delta=access_token_expires)
+
+
+@pytest.fixture()
+def token_with_scope(user_in_db):
+    access_token_expires = timedelta(minutes=5)
+    return create_access_token(
+        data={"sub": user_in_db.login, "scopes": ["custom_scope"]}, expires_delta=access_token_expires
+    )
 
 
 @pytest.fixture()
@@ -87,6 +99,19 @@ def test_check_telegram_login_timestamp_neg():
 @pytest.mark.asyncio
 async def test_get_current_user(token, user_in_db):
     assert await get_current_user(security_scopes=SecurityScopes(), token=token) == user_in_db
+
+
+@pytest.mark.asyncio
+async def test_get_current_user_with_custom_scope(token_with_scope, user_in_db):
+    assert (
+        await get_current_user(security_scopes=SecurityScopes(["custom_scope"]), token=token_with_scope) == user_in_db
+    )
+
+
+@pytest.mark.asyncio
+async def test_get_current_user_with_wrong_scope(token_with_scope, user_in_db):
+    with pytest.raises(HTTPException):
+        assert await get_current_user(security_scopes=SecurityScopes(["invalid_scope"]), token=token_with_scope)
 
 
 @pytest.mark.asyncio
