@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Tuple
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -65,3 +65,51 @@ def get_telegram_timestamp(db: Session, timestamp: float):
 def delete_telegram_timestamp(db: Session, timestamp: float):
     timestamp_db = get_telegram_timestamp(db, timestamp)
     db.delete(timestamp_db)
+
+
+# Trivia
+def get_questions(db: Session, limit: int = 10, skip: int = 0) -> Tuple[models.Trivia]:
+    return db.query(models.Trivia).order_by(models.Trivia.created_at.desc()).offset(skip).limit(limit).all()
+
+
+def get_question(db: Session, question_id: UUID) -> models.Trivia:
+    return db.query(models.Trivia).filter(models.Trivia.id == question_id).first()
+
+
+def get_user_questions(db: Session, user_id: UUID, limit: int = 10, skip: int = 0) -> Tuple[models.Trivia]:
+    return (
+        db.query(models.Trivia)
+        .filter(models.Trivia.owner == user_id)
+        .order_by(models.Trivia.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+
+def get_user_latest_question(db: Session, user_id: UUID) -> models.Trivia:
+    return get_user_questions(db=db, user_id=user_id, limit=1)[0]
+    # return (
+    #   db.query(models.Trivia).filter(models.Trivia.owner == user_id).order_by(models.Trivia.created_at.desc()).first()
+    # )
+
+
+def create_question(db: Session, question: schemas.Question, user_id: UUID) -> models.Trivia:
+    db_question = models.Trivia(owner=user_id, **question.dict())
+    db.add(db_question)
+    db.commit()
+    db.refresh(db_question)
+    return db_question
+
+
+def update_question(db: Session, question_id: UUID, question: schemas.Question):
+    db_question: models.Trivia = db.query(models.Trivia).filter(models.Trivia.id == question_id).first()
+    db_question.question = question.question
+    db_question.response = question.response
+    db_question.answer1 = question.answer1
+    db_question.answer2 = question.answer2
+    db_question.answer3 = question.answer3
+    db_question.answer4 = question.answer4
+    db.commit()
+    db.refresh(db_question)
+    return db_question

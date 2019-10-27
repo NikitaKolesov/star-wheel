@@ -1,7 +1,9 @@
 from datetime import timedelta
+from typing import List
 from uuid import UUID
 
 from fastapi import Depends, HTTPException
+from fastapi.params import Path
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -74,3 +76,36 @@ async def login_from_telegram_widget(auth_data: schemas.TelegramUserData, db: Se
         data={"sub": user_in_db.login, "scopes": schemas.Scopes.USER.value}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.get("/users/{user_id}/questions")
+async def get_user_questions(
+    skip: int = 0, limit: int = 100, current_user: models.User = Depends(security.get_current_active_user)
+):
+    return crud.get_user_questions(
+        db=Session.object_session(current_user), user_id=current_user.id, limit=limit, skip=skip
+    )
+
+
+@app.get("/questions", response_model=List[schemas.QuestionInDb])
+async def get_questions(
+    skip: int = 0, limit: int = 100, current_user: models.User = Depends(security.get_current_active_user)
+):
+    # TODO add user protection
+    return crud.get_questions(db=Session.object_session(current_user), limit=limit, skip=skip)
+
+
+@app.get("/questions/{question_id}", response_model=schemas.QuestionInDb)
+async def get_question(
+    question_id: UUID = Path(..., title="The ID of the question to get"),
+    current_user: models.User = Depends(security.get_current_active_user),
+):
+    # TODO add user protection
+    return crud.get_question(db=Session.object_session(current_user), question_id=question_id)
+
+
+@app.post("/questions", response_model=schemas.QuestionInDb)
+async def create_question(
+    question: schemas.Question, current_user: models.User = Depends(security.get_current_active_user)
+):
+    return crud.create_question(db=Session.object_session(current_user), question=question, user_id=current_user.id)

@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 from typing import Optional, List
 from uuid import UUID
@@ -44,6 +45,24 @@ class TelegramUserData(BaseModel):
     photo_url: str
     auth_date: int
     hash: str
+
+
+class Question(BaseModel):
+    question: str
+    response: int
+    answer1: str
+    answer2: str
+    answer3: str
+    answer4: str
+
+
+class QuestionInDb(Question):
+    id: UUID
+    owner: UUID
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
 
 
 class Scopes(str, Enum):

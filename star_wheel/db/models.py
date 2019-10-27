@@ -1,11 +1,13 @@
 """SQL Alchemy models"""
 
 import logging
+from datetime import datetime
 from typing import MutableMapping, Any
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Column, String
+from sqlalchemy import BigInteger, Column, String, SmallInteger, ForeignKey
 from sqlalchemy.dialects.postgresql import BOOLEAN, TIMESTAMP, UUID
+from sqlalchemy.orm import relationship
 
 from star_wheel.db import Base
 
@@ -28,11 +30,29 @@ class User(Base):
     photo_url = Column(String)
     password_hash = Column(String)
 
+    trivia_questions = relationship("Trivia", back_populates="user")
+
     def __repr__(self) -> str:
         return f"User(login='{self.login}', telegram_id='{self.telegram_id}')"
 
     def dict(self) -> MutableMapping[str, Any]:
         return self.__dict__
+
+
+class Trivia(Base):
+    __tablename__ = "trivia"
+
+    id = Column(UUID, primary_key=True, nullable=False, default=str_uuid)
+    owner = Column(UUID, ForeignKey("users.id"), nullable=False)
+    question = Column(String, nullable=False)
+    response = Column(SmallInteger, nullable=False)
+    answer1 = Column(String, nullable=False)
+    answer2 = Column(String, nullable=False)
+    answer3 = Column(String, nullable=True)
+    answer4 = Column(String, nullable=True)
+    created_at = Column(TIMESTAMP, nullable=False, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="trivia_questions")
 
 
 class TelegramTimestamp(Base):

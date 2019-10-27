@@ -3,17 +3,10 @@ from starlette.middleware.cors import CORSMiddleware
 
 from star_wheel.handlers import app
 
-origins = [
-    "http://f55d6373.eu.ngrok.io",
-    "https://f55d6373.eu.ngrok.io",
-]
+origins = ["http://f55d6373.eu.ngrok.io", "https://f55d6373.eu.ngrok.io"]
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"]
 )
 
 
