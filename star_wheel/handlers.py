@@ -66,11 +66,11 @@ async def login_from_telegram_widget(auth_data: schemas.TelegramUserData, db: Se
     """Custom docstring for telegram login"""
     if not security.verify_telegram_auth_data(auth_data.dict(), config.BOT_TOKEN):
         raise HTTPException(status_code=400, detail="Compromised telegram user data")
-    user_in_db = crud.get_user_by_username(db, auth_data.username)
+    user_in_db = crud.get_user_by_login(db, auth_data.username)
     if not user_in_db:
         user_in_db = crud.create_user_from_telegram_auth_data(db, auth_data)
     access_token_expires = timedelta(minutes=config.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user_in_db.username, "scopes": schemas.Scopes.USER.value}, expires_delta=access_token_expires
+        data={"sub": user_in_db.login, "scopes": schemas.Scopes.USER.value}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}

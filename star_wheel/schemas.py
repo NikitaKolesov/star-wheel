@@ -17,7 +17,6 @@ class UserCreate(User):
 class UserInDb(User):
     id: UUID
     telegram_id: Optional[int] = None
-    username: Optional[str] = None
     password_hash: Optional[str] = None
     disabled: Optional[bool] = False
     first_name: Optional[str] = None

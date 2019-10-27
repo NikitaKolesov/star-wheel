@@ -60,7 +60,7 @@ async def get_current_user(
         token_data = schemas.TokenData(scopes=token_scopes, login=login)
     except (PyJWTError, ValidationError):
         raise credentials_exception
-    user: models.User = crud.get_user_by_username(session, login) or crud.get_user_by_login(session, login)
+    user: models.User = crud.get_user_by_login(session, login)
     if user is None:
         raise credentials_exception
     for scope in security_scopes.scopes:

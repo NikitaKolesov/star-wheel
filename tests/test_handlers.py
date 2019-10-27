@@ -4,7 +4,7 @@ from starlette.testclient import TestClient
 
 from star_wheel import schemas
 from star_wheel.db import models
-from tests.const import AUTH_DATA
+from tests.const import TELEGRAM_AUTH_DATA
 
 
 def test_read_users_me(authorized_client: TestClient, user_in_db: models.User):
@@ -20,20 +20,20 @@ def test_create_user(authorized_client: TestClient, new_user: schemas.UserCreate
 
 
 def test_login_from_telegram_widget(unauthorized_client: TestClient):
-    response = unauthorized_client.post("/telegram_login", json=AUTH_DATA)
+    response = unauthorized_client.post("/telegram_login", json=TELEGRAM_AUTH_DATA)
     assert response.status_code == 200
     assert response.json()["token_type"] == "bearer"
 
 
 def test_login_from_telegram_widget_consequent(unauthorized_client: TestClient):
-    response = unauthorized_client.post("/telegram_login", json=AUTH_DATA)
+    response = unauthorized_client.post("/telegram_login", json=TELEGRAM_AUTH_DATA)
     assert response.status_code == 200
     assert response.json()["token_type"] == "bearer"
 
 
 def test_login_from_telegram_widget_invalid(unauthorized_client: TestClient):
-    AUTH_DATA["first_name"] = "NotNikita"
-    response = unauthorized_client.post("/telegram_login", json=AUTH_DATA)
+    TELEGRAM_AUTH_DATA["first_name"] = "NotNikita"
+    response = unauthorized_client.post("/telegram_login", json=TELEGRAM_AUTH_DATA)
     assert response.status_code == 400
     assert response.json() == {"detail": "Compromised telegram user data"}
 

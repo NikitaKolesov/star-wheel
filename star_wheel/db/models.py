@@ -22,7 +22,6 @@ class User(Base):
     id = Column(UUID, primary_key=True, nullable=False, default=str_uuid)
     login = Column(String, unique=True)
     telegram_id = Column(BigInteger, unique=True)
-    username = Column(String, unique=True)
     disabled = Column(BOOLEAN, default=False)
     first_name = Column(String)
     last_name = Column(String)
@@ -30,7 +29,7 @@ class User(Base):
     password_hash = Column(String)
 
     def __repr__(self) -> str:
-        return f"User(login='{self.login}', username='{self.username}', telegram_id='{self.telegram_id}')"
+        return f"User(login='{self.login}', telegram_id='{self.telegram_id}')"
 
     def dict(self) -> MutableMapping[str, Any]:
         return self.__dict__

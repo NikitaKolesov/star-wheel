@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, MutableMapping, Any
+from typing import List
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -21,10 +21,6 @@ def get_user_by_login(db: Session, login: str) -> models.User:
     return db.query(models.User).filter(models.User.login == login).first()
 
 
-def get_user_by_username(db: Session, username: str) -> models.User:
-    return db.query(models.User).filter(models.User.username == username).first()
-
-
 def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[models.User]:
     return db.query(models.User).offset(skip).limit(limit).all()
 
@@ -41,7 +37,7 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
 def create_user_from_telegram_auth_data(db: Session, auth_data: schemas.TelegramUserData) -> models.User:
     db_user = models.User(
         telegram_id=auth_data.id,
-        username=auth_data.username,
+        login=auth_data.username,
         first_name=auth_data.first_name,
         photo_url=auth_data.photo_url,
     )
