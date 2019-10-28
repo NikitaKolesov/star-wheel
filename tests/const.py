@@ -1,5 +1,4 @@
 from mimesis import Generic
-from sqlalchemy import create_engine
 
 from star_wheel import schemas
 
@@ -25,7 +24,7 @@ question_create_dict = {
     "answer1": "I'm fine. Thank you!",
     "answer2": "So so",
     "answer3": "Marvellous my friend",
-    "answer4": "Simply awesome!"
+    "answer4": "Simply awesome!",
 }
 question_update_dict = {
     "question": "How are you?",
@@ -33,7 +32,6 @@ question_update_dict = {
     "answer1": "Silence...",
     "answer2": "Thinking about next day",
     "answer3": "Got sick",
-    "answer4": "Oh, da hello!"
+    "answer4": "Oh, da hello!",
 }
 fake_users = [schemas.UserCreate(**user_dict) for user_dict in fake_users_dicts]
-ENGINE = create_engine("postgresql://postgres:qwe123QWE@localhost:5432/postgres")

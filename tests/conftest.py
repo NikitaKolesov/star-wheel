@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from starlette.testclient import TestClient
 
 from star_wheel import app, crud, schemas
-from star_wheel.db import Base, SessionLocal, models
+from star_wheel.db import Base, SessionLocal, models, engine
 from tests import const
 
 generic = Generic()
@@ -20,8 +20,8 @@ def local_session():
 # @pytest.fixture(scope="session")
 @pytest.fixture(scope="session", autouse=True)
 def recreate_fake_db():
-    Base.metadata.drop_all(const.ENGINE)
-    Base.metadata.create_all(const.ENGINE)
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
     session = SessionLocal()
     for user in const.fake_users:
         crud.create_user(session, user)
